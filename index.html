@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>長輩圖製作</title>
+
+    <style>
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+
+      input {
+        outline: none;
+      }
+
+      .colCenter {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .rowCenter {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .topMargin {
+        margin-top: 30px;
+      }
+
+      body {
+        height: 100vh;
+      }
+
+      header {
+        text-align: center;
+      }
+
+      main {
+        margin-top: 1%;
+        border: 1px solid;
+        border-radius: 10px;
+      }
+
+      section {
+        padding: 50px;
+      }
+
+      .updateIMG label {
+        padding: 10px;
+        font-size: 20px;
+        background-color: aquamarine;
+        border-radius: 5px;
+        box-shadow: 1px 1px 3px #838383;
+        cursor: pointer;
+      }
+
+      .updateIMG label:hover {
+        box-shadow: 2px 2px 3px #838383;
+      }
+
+      .updateIMG input {
+        width: 1px;
+        height: 1px;
+      }
+
+      textarea {
+        width: 500px;
+        height: 300px;
+        padding: 10px;
+        font-size: 20px;
+        border-radius: 5px;
+        resize: none;
+      }
+    </style>
+  </head>
+
+  <body class="colCenter">
+    <header>
+      <h1>---長輩圖製作---</h1>
+    </header>
+    <main class="rowCenter">
+      <section class="colCenter">
+        <div class="topMargin updateIMG">
+          <label for="chooseFile">上傳圖片</label>
+          <input type="file" accept=".jpg, .jpeg, .png, .gif" id="chooseFile">
+        </div>
+
+        <canvas id="previewIMG" width="800" height="600" class="topMargin"></canvas>
+
+        <a href="javascript:;" download="" class="topMargin" id="downloadIMG">下載</a>
+      </section>
+
+      <section class="colCenter">
+        <label for="fontSize" class="topMargin">文字大小：</label>
+        <input type="range" min="40" max="120" value="50" id="fontSize">
+
+        <label for="fontWidth" class="topMargin">文字框大小：</label>
+        <input type="range" min="1" max="3" value="1" id="fontWidth">
+
+        <label for="fontColor" class="topMargin">文字顏色：</label>
+        <input type="color" id="fontColor">
+
+        <label for="fontColor2" class="topMargin">文字框顏色：</label>
+        <input type="color" id="fontColor2">
+
+        <label for="msg" class="topMargin">新增內容：</label>
+        <textarea placeholder="說些什麼...." id="msg"></textarea>
+      </section>
+    </main>
+
+    <script type="text/javascript">
+      class MakeIMG {
+        constructor() {
+          this.chooseFile = document.getElementById("chooseFile");
+          this.previewIMG = document.getElementById("previewIMG");
+          this.fontSize = document.getElementById("fontSize");
+          this.fontWidth = document.getElementById("fontWidth");
+          this.fontColor = document.getElementById("fontColor");
+          this.fontColor2 = document.getElementById("fontColor2");
+          this.downloadIMG = document.getElementById("downloadIMG");
+
+          this.ctx = previewIMG.getContext("2d");
+          this.msg = document.getElementById("msg");
+          this.img = new Image();
+
+          this.ok = false;
+
+          this.init();
+        }
+
+        init() {
+          this.chooseFile.onchange = (e) => {
+            this.readFlie(e);
+            this.ok = true;
+          }
+
+          this.msg.onkeyup = (e) => {
+            this.preview(this.img);
+            this.ok = true;
+          }
+
+          this.fontSize.onchange = () => {
+            this.preview(this.img);
+          }
+
+          this.fontWidth.onchange = () => {
+            this.preview(this.img);
+          }
+
+          this.fontColor.onchange = () => {
+            this.preview(this.img);
+          }
+
+          this.fontColor2.onchange = () => {
+            this.preview(this.img);
+          }
+
+          this.downloadIMG.onclick = () => {
+            this.finish();
+          }
+        }
+
+        //圖片讀取
+        readFlie(e) {
+          //讀取檔案
+          let file = e.target.files[0];
+
+          let reader = new FileReader();
+
+          //把檔案轉乘base64
+          reader.readAsDataURL(file);
+          //轉換完執行
+          reader.onload = (e) => {
+            this.img.src = e.target.result;
+            this.img.onload = () => {
+              this.preview(this.img);
+            }
+          }
+        }
+
+        //畫圖
+        preview(img = null) {
+          this.ctx.clearRect(0, 0, this.previewIMG.width, this.previewIMG.height);
+          let newWidth, newHeight;
+          if (img != null) {
+            if (img.width > img.height) {
+              newWidth = this.previewIMG.width;
+              newHeight = img.height / (img.width / this.previewIMG.width);
+            } else {
+              newHeight = this.previewIMG.height;
+              newWidth = img.width / (img.height / this.previewIMG.height);
+            }
+            this.ctx.drawImage(img, (this.previewIMG.width - newWidth) / 2, (this.previewIMG.height - newHeight) / 2, newWidth, newHeight);
+          }
+
+          this.addText();
+        }
+
+        //畫文字
+        addText() {
+          this.ctx.font = `bold ${this.fontSize.value}px sans-serlf`;
+          this.ctx.fillStyle = this.fontColor.value + "";
+          this.ctx.strokeStyle = this.fontColor2.value + "";
+          this.ctx.lineWidth = this.fontWidth.value + "";
+          this.ctx.fillText(this.msg.value, 100, this.previewIMG.height / 2);
+          this.ctx.strokeText(this.msg.value, 100, this.previewIMG.height / 2);
+        }
+
+        //下載
+        finish() {
+          if (this.ok) {
+            this.downloadIMG.download = new Date().toLocaleString() + ".jpg";
+            this.downloadIMG.href = this.previewIMG.toDataURL("image/png");
+          }
+        }
+      }
+
+      new MakeIMG();
+    </script>
+  </body>
+
+</html>
