@@ -210,8 +210,11 @@
           this.ctx.fillStyle = this.fontColor.value + "";
           this.ctx.strokeStyle = this.fontColor2.value + "";
           this.ctx.lineWidth = this.fontWidth.value + "";
-          this.ctx.fillText(this.msg.value, 100, this.previewIMG.height / 2);
-          this.ctx.strokeText(this.msg.value, 100, this.previewIMG.height / 2);
+          let msgList = this.msg.value.split("\n");
+          for (let i = 0; i < msgList.length; i++) {
+            this.ctx.fillText(msgList[i], 100, this.previewIMG.height / 2 + this.fontSize.value * i);
+            this.ctx.strokeText(msgList[i], 100, this.previewIMG.height / 2 + this.fontSize.value * i);
+          }
         }
 
         //下載
